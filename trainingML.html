@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jumping Jack Detection</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: "Work Sans", sans-serif;
+        background-color: #f8ffde;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      body {
+        font-family: "Space Mono", monospace;
+      }
+      .container {
+        background: #ffefc9;
+        border-radius: 40px;
+        padding: 20px;
+        text-align: center;
+        max-width: 500px;
+      }
+      h1 {
+        font-size: 50px;
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 20px;
+        color: #555;
+        margin-bottom: 20px;
+      }
+      .status {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+      }
+      #video {
+        display: none;
+      }
+      .start-button {
+        background-color: #e4a0b7;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .start-button:hover {
+        background-color: #d55f87;
+      }
+      .footer-text {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Jumping Jack Detection</h1>
+      <p>Let's see if you're doing jumping jacks!</p>
+      <video id="video" width="640" height="480" autoplay></video>
+      <p class="status">Waiting for action...</p>
+      <button class="start-button" onclick="startDetection()">Start Workout</button>
+      <div class="footer-text">Make sure your whole body is visible!</div>
+    </div>
+
+    <script>
+      let model, videoElement;
+let isJumpingJack = false;
+let statusElement = document.querySelector(".status");
+
+async function startDetection() {
+  videoElement = document.getElementById("video");
+
+  // Load the model if it hasn't been loaded yet
+  if (!model) {
+    statusElement.innerText = "Loading model...";
+    model = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+    statusElement.innerText = "Model loaded! Starting workout...";
+  }
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+  });
+  videoElement.srcObject = stream;
+
+  videoElement.onloadeddata = () => {
+    detectPose();
+    print(detectPose)
+  };
+}
+async function detectPose() {
+  const poses = await model.estimatePoses(videoElement, {
+    flipHorizontal: false,
+  });
+  analyzePose(poses[0]);
+  requestAnimationFrame(detectPose); 
+}
+
+function analyzePose(pose) {
+  const keypoints = pose.keypoints;
+  let armsUp = false;
+  let legsSpread = false;
+
+  keypoints.forEach((point) => {
+    if (point.part === "leftShoulder" && point.position.y < 200) {
+      armsUp = true;
+    }
+    if (point.part === "rightShoulder" && point.position.y < 200) {
+      armsUp = true;
+    }
+
+    if (point.part === "leftKnee" && point.position.x < 200) {
+      legsSpread = true;
+    }
+    if (point.part === "rightKnee" && point.position.x > 200) {
+      legsSpread = true;
+    }
+  });
+
+  if (armsUp && legsSpread) {
+    if (!isJumpingJack) {
+      isJumpingJack = true;
+      statusElement.innerText = "Jumping Jack detected! Keep going!";
+    }
+  } else {
+    if (isJumpingJack) {
+      isJumpingJack = false;
+      statusElement.innerText = "Not a Jumping Jack. Try again!";
+    }
+  }
+}
+    </script>
+  </body>
+</html>

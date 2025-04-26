@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval Choice</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Work Sans', sans-serif;
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            background: #ffefc9;
+            padding: 20px;
+            border-radius: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .container h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            margin: 20px 0;
+        }
+
+        .options button {
+            width: 100%;
+            margin: 8px 0;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: #e4a0b7;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .options button:hover {
+            background-color: #d55f87;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+            accent-color: #e4a0b7;
+        }
+
+        .footer-text {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .navigate-button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            background-color: #e4a0b7;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .navigate-button:hover {
+            background-color: #d55f87;
+        }
+        body {
+            background-image: url('https://chat.google.com/u/0/api/get_attachment_url?url_type=FIFE_URL&content_type=image%2Fpng&attachment_token=AOo0EEXhiWu8xJqJTntEGNzEZXQYE%2BwrI9s9oKxz1tyMsd%2FXKgXfRb6DSydaq8XUL5uBTXjIPFt29BUyWzfvnhRL%2FanBIw3MFSQ4o9mx%2BqTCZdZ9vqkRRwX1xlG42LatoM5HZ5o4dWjVf9SYvuELG2hRigiY0Xq66F4Dt2%2Bw7jd3sOkZw2nvfTjHKkV7KZtdOwCVAJpppwnF97sTCwNXK%2Fr%2B6LMtVgLIhbXKTh5L0iV4Qo%2BYTu%2FB%2Fz031BjDq0wgWkHj62UZ8v1xMHZposBWf7X8bCOJxURxMV3r8kmmoSDy5%2B4O4fkaNRfN3Mj6cXJA%2FZLC1z%2BNuxshZmUF82KLbbgt9aeHpFmMRIXSaYQ8K%2BN2b1%2Fn6gYWlTP7BoADe6c47MLeP3pSr%2FuryJYGejKMZp7fuJZ2%2FTSd0O8aM19%2BFvqeuW%2FwtB6eA07cmxLpkbb1wbQsIjGTdsw6TJcjqHkTDwuISsBL2SZJdOxUInRYtG9EOEpDQcDv2ZFDpUTBuZ1LDCSpZO68aG5KLzct25AJezyvcpuSDkDvH7QVdkZ7E%2BCjAhk%2FItLFFsikk%2FLRXNPMch53sppC1HG3SPRZO7q8KK8%3D&allow_caching=true&sz=w1920-h912');
+   
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Pick your pace 🌼 </h1>
+        <div class="options">
+            <button>5-10 Minutes</button>
+            <button>10-15 Minutes</button>
+            <button>15-20 Minutes</button>
+            <button>20-25 Minutes</button>
+        </div>
+        <div class="slider-container">
+            <label for="custom-slider">Custom Time (5-50 Minutes):</label>
+            <input type="range" id="custom-slider" min="5" max="50" step="1">
+        </div>
+        <div class="footer-text">⏳ 1 Hour Limit</div>
+        <button class="navigate-button" onclick="window.location.href='page.html'">Next</button>
+    </div>
+</body>
+</html>
