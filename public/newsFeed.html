@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FitFeed</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #posts {
+      width: 90%;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+    .post {
+      background: white;
+      margin-bottom: 15px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      display: none;
+      flex-direction: column;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>FitFeed 🏋️‍♂️</h1>
+  
+  <!-- Post Form -->
+  <div>
+    <h2>Share a Post</h2>
+    <input id="username" type="text" placeholder="Enter your name" />
+    <textarea id="postText" placeholder="What's on your mind?" rows="4"></textarea>
+    <button onclick="addPost()">Post</button>
+  </div>
+
+  <div id="posts"></div>
+
+  <div id="overlay">
+    <p>Time to workout! 🚨</p>
+    <button onclick="startWorkout()">Start Workout</button>
+  </div>
+
+<script>
+  // --- Firebase Setup ---
+  const firebaseConfig = {
+    apiKey: "YOUR-API-KEY",
+    authDomain: "YOUR-FIREBASE-APP.firebaseapp.com",
+    projectId: "YOUR-FIREBASE-PROJECT-ID",
+    storageBucket: "YOUR-FIREBASE-PROJECT-ID.appspot.com",
+    messagingSenderId: "SENDER-ID",
+    appId: "APP-ID"
+  };
+  
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // --- Load Posts ---
+  async function loadPosts() {
+    const postsDiv = document.getElementById('posts');
+    postsDiv.innerHTML = '';
+
+    const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `<h3>${post.user}</h3><p>${post.text}</p>`;
+      postsDiv.appendChild(div);
+    });
+  }
+
+  loadPosts();
+
+  // --- Add Post to Firebase ---
+  async function addPost() {
+    const user = document.getElementById('username').value;
+    const text = document.getElementById('postText').value;
+
+    if (user && text) {
+      await db.collection('posts').add({
+        user: user,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById('username').value = '';
+      document.getElementById('postText').value = '';
+
+      loadPosts();  // Reload posts to show the new one
+    } else {
+      alert('Please fill in both fields.');
+    }
+  }
+
+  // --- Timer System ---
+  const TEN_MINUTES = 10 * 60 * 1000; // in milliseconds
+  let workoutCompleted = true;
+
+  setInterval(() => {
+    if (workoutCompleted) {
+      document.getElementById('overlay').style.display = 'flex';
+      workoutCompleted = false;
+    }
+  }, TEN_MINUTES);
+
+  function startWorkout() {
+    window.location.href = 'workout.html';
+  }
+
+  // --- On load, check last workout completion
+  window.addEventListener('load', () => {
+    const lastWorkout = localStorage.getItem('lastWorkout');
+    if (!lastWorkout || (Date.now() - lastWorkout > TEN_MINUTES)) {
+      document.getElementById('overlay').style.display = 'flex';
+      workoutCompleted = false;
+    }
+  });
+</script>
+
+</body>
+</html>

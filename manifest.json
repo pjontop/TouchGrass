@@ -1,0 +1,22 @@
+{
+    "manifest_version": 2,
+    "name": "Touch Grass",
+    "description": "A REAl app making life REAL.",
+    "version": "1",
+    "author": "Pramsu Pandey, Selina Tung, and Baran Naji",
+    "permissions": [
+        "activeTab",
+        "geolocation",
+        "storage",
+        "notifications"
+    ],
+    "browser_action": {
+        "default_popup": "onboarding.html",
+        "default_title": "Touch Grass" 
+    },
+    "icons": {
+        "16": "assets/logo.png",
+        "48": "assets/logo.png",
+        "128": "assets/logo.png"
+    }
+}
