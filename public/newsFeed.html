@@ -2,22 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitFeed</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #fafafa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    * {
+      box-sizing: border-box;
     }
-    #posts {
-      width: 90%;
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Work Sans', sans-serif;
+      color: #333;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      line-height: 1.5;
+      background-image: url('https://chat.google.com/u/0/api/get_attachment_url?url_type=FIFE_URL&content_type=image%2Fpng&attachment_token=AOo0EEV3tP%2F%2FCYXv9Zdwl%2F1RNfzGV9UTu8KUWzw0qmIfK0IJlAKOpf%2Fh%2FIj20SebQb9EHmFXROoG6b%2B7MYQ8SPlbRgsREGIoF20Mi0SCNdFHO6%2FnM9kH1zn%2FDtlFNofJC5CAnY3wN20FfWfNI1r0uiLaHWpgz3MIiHoLZC8SjFQefFVmwgbhBReCd4%2BoSrrTtPtyaLEhs5cWm74poV6MAXpHb%2Fbca1Un9cwjLm9qTzwWKtRCQguUiMNQVoKjgvQ84WqGm0mrZa62kPY35HNaS2zmtU4xWspZR2pklZMIRcHDF%2FXwF0IpLw7g88g5nDkMfBrv9xE4VN9fyzcWWRmgQ9jUaSxN5Pdren%2BzLpfvRqXUbaMxSZG%2Bfob%2Be89xVSjUhgls49Jnzn4At82tW1BBu20HmGokm0N0SjDN%2FQP66SySHyGZJoBxPk20WIhiUTwzCOd1%2BEl9uwD2mCeKZKDEs07lEoPsBkUYk6soPlcMDde0jPLwS%2Bsf5ajeQV4dHPPMz2CzzV8WCHGybwdnxNKOve4GI9sK5SKhfyphVY68T%2Bj7KanUzCMTVWhElaCuvvknyneAV5PAxI7A8m2njjtdjUc%3D&allow_caching=true&sz=w1920-h912');
+      background-size: cover;
+    }
+    .container {
+      background: #ffefc9;
+      border-radius: 40px;
+      padding: 20px;
       max-width: 500px;
-      margin-top: 20px;
+      width: 90%;
+      text-align: center;
+    }
+    .container h1 {
+      font-size: 50px;
+      margin-bottom: 10px;
+      font-family: 'Space Mono', monospace;
+    }
+    .container h2 {
+      font-size: 24px;
+      color: #555;
+    }
+    .container input, .container textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    .container input[type="text"]:focus, .container textarea:focus {
+      border-color: #e4a0b7;
+      outline: none;
+    }
+    .container button {
+      width: 100%;
+      background-color: #e4a0b7;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .container button:hover {
+      background-color: #d55f87;
     }
     .post {
       background: white;
@@ -39,115 +90,106 @@
       display: none;
       flex-direction: column;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-    }
   </style>
 </head>
 
 <body>
-  <h1>FitFeed 🏋️‍♂️</h1>
-  
-  <!-- Post Form -->
-  <div>
-    <h2>Share a Post</h2>
-    <input id="username" type="text" placeholder="Enter your name" />
-    <textarea id="postText" placeholder="What's on your mind?" rows="4"></textarea>
-    <button onclick="addPost()">Post</button>
+
+  <div class="container">
+    <h1>FitFeed 🏋️‍♂️</h1>
+
+    <!-- Post Form -->
+    <div>
+      <h2>Share a Post</h2>
+      <input id="username" type="text" placeholder="Enter your name" />
+      <textarea id="postText" placeholder="What's on your mind?" rows="4"></textarea>
+      <button onclick="addPost()">Post</button>
+    </div>
+
+    <div id="posts"></div>
+
+    <div id="overlay">
+      <p>Time to workout! 🚨</p>
+      <button onclick="startWorkout()">Start Workout</button>
+    </div>
   </div>
 
-  <div id="posts"></div>
+  <script>
+    // --- Firebase Setup ---
+    const firebaseConfig = {
+      apiKey: "YOUR-API-KEY",
+      authDomain: "YOUR-FIREBASE-APP.firebaseapp.com",
+      projectId: "YOUR-FIREBASE-PROJECT-ID",
+      storageBucket: "YOUR-FIREBASE-PROJECT-ID.appspot.com",
+      messagingSenderId: "SENDER-ID",
+      appId: "APP-ID"
+    };
+    
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-  <div id="overlay">
-    <p>Time to workout! 🚨</p>
-    <button onclick="startWorkout()">Start Workout</button>
-  </div>
+    // --- Load Posts ---
+    async function loadPosts() {
+      const postsDiv = document.getElementById('posts');
+      postsDiv.innerHTML = '';
 
-<script>
-  // --- Firebase Setup ---
-  const firebaseConfig = {
-    apiKey: "YOUR-API-KEY",
-    authDomain: "YOUR-FIREBASE-APP.firebaseapp.com",
-    projectId: "YOUR-FIREBASE-PROJECT-ID",
-    storageBucket: "YOUR-FIREBASE-PROJECT-ID.appspot.com",
-    messagingSenderId: "SENDER-ID",
-    appId: "APP-ID"
-  };
-  
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  // --- Load Posts ---
-  async function loadPosts() {
-    const postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML = '';
-
-    const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
-    snapshot.forEach(doc => {
-      const post = doc.data();
-      const div = document.createElement('div');
-      div.className = 'post';
-      div.innerHTML = `<h3>${post.user}</h3><p>${post.text}</p>`;
-      postsDiv.appendChild(div);
-    });
-  }
-
-  loadPosts();
-
-  // --- Add Post to Firebase ---
-  async function addPost() {
-    const user = document.getElementById('username').value;
-    const text = document.getElementById('postText').value;
-
-    if (user && text) {
-      await db.collection('posts').add({
-        user: user,
-        text: text,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      const snapshot = await db.collection('posts').orderBy('timestamp', 'desc').get();
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `<h3>${post.user}</h3><p>${post.text}</p>`;
+        postsDiv.appendChild(div);
       });
-
-      document.getElementById('username').value = '';
-      document.getElementById('postText').value = '';
-
-      loadPosts();  // Reload posts to show the new one
-    } else {
-      alert('Please fill in both fields.');
     }
-  }
 
-  // --- Timer System ---
-  const TEN_MINUTES = 10 * 60 * 1000; // in milliseconds
-  let workoutCompleted = true;
+    loadPosts();
 
-  setInterval(() => {
-    if (workoutCompleted) {
-      document.getElementById('overlay').style.display = 'flex';
-      workoutCompleted = false;
+    // --- Add Post to Firebase ---
+    async function addPost() {
+      const user = document.getElementById('username').value;
+      const text = document.getElementById('postText').value;
+
+      if (user && text) {
+        await db.collection('posts').add({
+          user: user,
+          text: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('username').value = '';
+        document.getElementById('postText').value = '';
+
+        loadPosts();  // Reload posts to show the new one
+      } else {
+        alert('Please fill in both fields.');
+      }
     }
-  }, TEN_MINUTES);
 
-  function startWorkout() {
-    window.location.href = 'workout.html';
-  }
+    // --- Timer System ---
+    const TEN_MINUTES = 10 * 60 * 1000; // in milliseconds
+    let workoutCompleted = true;
 
-  // --- On load, check last workout completion
-  window.addEventListener('load', () => {
-    const lastWorkout = localStorage.getItem('lastWorkout');
-    if (!lastWorkout || (Date.now() - lastWorkout > TEN_MINUTES)) {
-      document.getElementById('overlay').style.display = 'flex';
-      workoutCompleted = false;
+    setInterval(() => {
+      if (workoutCompleted) {
+        document.getElementById('overlay').style.display = 'flex';
+        workoutCompleted = false;
+      }
+    }, TEN_MINUTES);
+
+    function startWorkout() {
+      window.location.href = 'workout.html';
     }
-  });
-</script>
+
+    // --- On load, check last workout completion
+    window.addEventListener('load', () => {
+      const lastWorkout = localStorage.getItem('lastWorkout');
+      if (!lastWorkout || (Date.now() - lastWorkout > TEN_MINUTES)) {
+        document.getElementById('overlay').style.display = 'flex';
+        workoutCompleted = false;
+      }
+    });
+  </script>
 
 </body>
 </html>
