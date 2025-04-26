@@ -1,2 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Camera testing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    video, canvas {
+      width: 90%;
+      max-width: 500px;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #af4c90;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #a04577;
+    }
+    #recordingIndicator {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+      display: none;
+    }
+    a {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      color: #af4c77;
+    }
+  </style>
+</head>
+<body>
 
+  <h1>Camera testing</h1>
+
+  <video id="video" autoplay playsinline muted></video>
+  <br>
+
+  <button id="capturePhoto">Capture Photo</button>
+  <button id="startRecording">Start Recording</button>
+  <button id="stopRecording" disabled>Stop Recording</button>
+
+  <div id="recordingIndicator">● Recording...</div>
+
+  <br>
+  <canvas id="canvas" style="display: none;"></canvas>
+  <div id="recordedVideoContainer" style="margin-top: 20px;"></div>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const capturePhotoButton = document.getElementById('capturePhoto');
+    const startRecordingButton = document.getElementById('startRecording');
+    const stopRecordingButton = document.getElementById('stopRecording');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+    const recordedVideoContainer = document.getElementById('recordedVideoContainer');
+    const context = canvas.getContext('2d');
+
+    let mediaRecorder;
+    let recordedChunks = [];
+    let recordingTimeout;
+
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }, 
+          audio: true
+        });
+        video.srcObject = stream;
+        window.localStream = stream;
+      } catch (err) {
+        console.error('Error accessing camera: ', err);
+        alert("Could not access camera.");
+      }
+    }
+
+    initCamera();
+
+    // Capture Photo
+    capturePhotoButton.addEventListener('click', () => {
+      canvas.style.display = 'block';
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Optionally download photo
+      const imageURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = imageURL;
+      link.download = 'capture.png';
+      link.textContent = 'Download Photo';
+      document.body.appendChild(link);
+    });
+
+    // Start Video Recording
+    startRecordingButton.addEventListener('click', () => {
+      recordedChunks = [];
+      const options = { mimeType: 'video/webm; codecs=vp9' };
+
+      mediaRecorder = new MediaRecorder(window.localStream, options);
+
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const videoURL = URL.createObjectURL(blob);
+
+        const recordedVideo = document.createElement('video');
+        recordedVideo.controls = true;
+        recordedVideo.src = videoURL;
+        recordedVideo.style.width = '90%';
+        recordedVideo.style.maxWidth = '500px';
+        recordedVideoContainer.innerHTML = '';
+        recordedVideoContainer.appendChild(recordedVideo);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.href = videoURL;
+        downloadLink.download = 'recording.webm';
+        downloadLink.textContent = 'Download Video';
+        recordedVideoContainer.appendChild(downloadLink);
+
+        recordingIndicator.style.display = 'none';
+      };
+
+      mediaRecorder.start();
+      startRecordingButton.disabled = true;
+      stopRecordingButton.disabled = false;
+      recordingIndicator.style.display = 'block';
+
+      // Automatically stop recording after 15 seconds (15000 ms)
+      recordingTimeout = setTimeout(() => {
+        if (mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+          startRecordingButton.disabled = false;
+          stopRecordingButton.disabled = true;
+          recordingIndicator.style.display = 'none';
+        }
+      }, 15000);
+    });
+
+    // Stop Video Recording manually
+    stopRecordingButton.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+      clearTimeout(recordingTimeout);
+      startRecordingButton.disabled = false;
+      stopRecordingButton.disabled = true;
+      recordingIndicator.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>
 
