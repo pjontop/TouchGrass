@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jumping Jack Detection</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: "Work Sans", sans-serif;
+        background-color: #f8ffde;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      body {
+        font-family: "Space Mono", monospace;
+      }
+      .start-button {
+        background: #ffefc9;
+        border-radius: 40px;
+        padding: 20px;
+        text-align: center;
+        max-width: 500px;
+      }
+      h1 {
+        font-size: 50px;
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 20px;
+        color: #555;
+        margin-bottom: 20px;
+      }
+      .status {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+      }
+      .start-button button {
+        background-color: #e4a0b7;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .start-button:hover button{
+        background-color: #d55f87;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="start-button">
+      <h1>Introduce Grassy</h1>
+      <p>This is Grassy, it will be with you throughout your journy in Touch Grass, and cheer you up.</p>
+      <button type="submit">Get Started</button>
+    </div>
+  </body>
+</html>
