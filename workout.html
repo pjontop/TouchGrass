@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jumping Jack Detection</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Work Sans', sans-serif;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-image: url('./assets/WorkoutGrassy.png');
+      background-size: cover; /* optional: makes the image cover the screen nicely */
+      background-position: center; /* optional: centers the image */
+
+    }
+    .container {
+      background: #ffefc9;
+      padding: 20px;
+      border-radius: 40px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      padding: 20px; /* Added padding for better spacing */
+    }
+
+    h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-family: 'Work Sans', sans-serif;
+      font-size: 24px;
+      margin: 10px 0;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background-color: #e4a0b7;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      font-family: 'Work Sans', sans-serif;
+    }
+
+    button:hover {
+      background-color: #d55f87;
+    }
+
+    #webcam {
+      margin-top: 20px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
+      display: none;
+    }
+
+    #counter {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    body {
+    background-image: url('./assets/WorkoutGrassy.png');
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Jumping Jack Detection</h1>
+    <h2>Let's see if you're doing jumping jacks!</h2>
+    <p>Make sure your whole body is visible!</p>
+    <button onclick="startWorkout()">Start Workout</button>
+    <video id="webcam" autoplay playsinline></video>
+    <div id="counter">0 / 10 Jumping Jacks</div>
+  </div>
+
+  <script>
+    let detector;
+    let webcam;
+    let counter = 0;
+    let lastPose = null;
+
+    async function initDetector() {
+      detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet);
+    }
+
+    async function startWorkout() {
+      document.querySelector('button').style.display = 'none';
+      webcam = document.getElementById('webcam');
+      webcam.style.display = 'block';
+
+      await initDetector();
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+      });
+      webcam.srcObject = stream;
+
+      webcam.addEventListener('loadeddata', predictPose);
+    }
+
+    async function predictPose() {
+      if (!detector) return;
+
+      const poses = await detector.estimatePoses(webcam);
+      if (poses.length > 0) {
+        const pose = poses[0];
+        if (isJumpingJack(pose)) {
+          if (lastPose !== "open") {
+            counter++;
+            document.getElementById('counter').innerText = `${counter} / 10 Jumping Jacks`;
+            lastPose = "open";
+          }
+        } else {
+          lastPose = "closed";
+        }
+      }
+
+      if (counter < 10) {
+        requestAnimationFrame(predictPose);
+      } else {
+        document.getElementById('counter').innerText = "Workout Complete! 🎉";
+      }
+    }
+
+    function isJumpingJack(pose) {
+      const keypoints = pose.keypoints;
+
+      const leftHand = keypoints.find(k => k.name === 'left_wrist');
+      const rightHand = keypoints.find(k => k.name === 'right_wrist');
+      const leftFoot = keypoints.find(k => k.name === 'left_ankle');
+      const rightFoot = keypoints.find(k => k.name === 'right_ankle');
+      const leftShoulder = keypoints.find(k => k.name === 'left_shoulder');
+      const rightShoulder = keypoints.find(k => k.name === 'right_shoulder');
+
+      if (!leftHand || !rightHand || !leftFoot || !rightFoot || !leftShoulder || !rightShoulder) return false;
+
+      const handsAboveShoulders = leftHand.y < leftShoulder.y && rightHand.y < rightShoulder.y;
+      const feetApart = Math.abs(leftFoot.x - rightFoot.x) > 150; // Adjust the threshold as needed
+
+      return handsAboveShoulders && feetApart;
+    }
+  </script>
+</body>
+</html>
