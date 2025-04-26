@@ -115,20 +115,18 @@
   </div>
 
   <script>
-    // --- Firebase Setup ---
+
     const firebaseConfig = {
       apiKey: "YOUR-API-KEY",
-      authDomain: "YOUR-FIREBASE-APP.firebaseapp.com",
-      projectId: "YOUR-FIREBASE-PROJECT-ID",
-      storageBucket: "YOUR-FIREBASE-PROJECT-ID.appspot.com",
-      messagingSenderId: "SENDER-ID",
+      authDomain: "touchgrass-crabrave.firebaseapp.com",
+      projectId: "touchgrass-crabrave",
+      storageBucket: "touchgrass-crabrave.appspot.com",
+      messagingSenderId: "640079843891",
       appId: "APP-ID"
     };
-    
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // --- Load Posts ---
     async function loadPosts() {
       const postsDiv = document.getElementById('posts');
       postsDiv.innerHTML = '';
@@ -160,14 +158,13 @@
         document.getElementById('username').value = '';
         document.getElementById('postText').value = '';
 
-        loadPosts();  // Reload posts to show the new one
+        loadPosts(); 
       } else {
         alert('Please fill in both fields.');
       }
     }
 
-    // --- Timer System ---
-    const TEN_MINUTES = 10 * 60 * 1000; // in milliseconds
+    const TEN_MINUTES = 10 * 60 * 1000;
     let workoutCompleted = true;
 
     setInterval(() => {
@@ -181,7 +178,6 @@
       window.location.href = 'workout.html';
     }
 
-    // --- On load, check last workout completion
     window.addEventListener('load', () => {
       const lastWorkout = localStorage.getItem('lastWorkout');
       if (!lastWorkout || (Date.now() - lastWorkout > TEN_MINUTES)) {
