@@ -20,6 +20,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        background-image: url('/assets/meetGrassy.png');
+        background-size: cover; /* optional: makes the image cover the screen nicely */
+        background-position: center; /* optional: centers the image */
+
       }
       body {
         font-family: "Space Mono", monospace;
@@ -63,7 +67,7 @@
     <div class="start-button">
       <h1>Introduce Grassy</h1>
       <p>This is Grassy, it will be with you throughout your journy in Touch Grass, and cheer you up.</p>
-      <button type="submit">Get Started</button>
+      <button class="start-button" onclick="window.location.href='grassyIntro.html'">Begin Workout</button>
     </div>
   </body>
 </html>
