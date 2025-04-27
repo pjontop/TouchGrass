@@ -1,0 +1,27 @@
+{
+  "name": "touchgrass",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pjontop/TouchGrass.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pjontop/TouchGrass/issues"
+  },
+  "homepage": "https://github.com/pjontop/TouchGrass#readme",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "csv-writer": "^1.6.0",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2"
+  }
+}

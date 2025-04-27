@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes - RealFeed</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Work Sans', sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: url('/assets/WorkoutGrassy.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            background: #ffefc9;
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .recipe {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .recipe h2 {
+            margin-top: 0;
+            color: #af4c77;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .recipe p {
+            color: #555;
+            font-size: 16px;
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            background-color: #ffefc9;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .nav-item {
+            font-size: 18px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            color: #af4c77;
+        }
+
+        .plus-icon {
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Healthy Recipes 🍎</h1>
+
+        <div class="recipe">
+            <h2>Grilled Chicken Salad</h2>
+            <p>Fresh greens topped with juicy grilled chicken, cherry tomatoes, cucumbers, and a light vinaigrette dressing.</p>
+        </div>
+
+        <div class="recipe">
+            <h2>Avocado Toast</h2>
+            <p>Whole-grain toast spread with smashed avocado, sprinkled with sea salt, chili flakes, and a drizzle of olive oil.</p>
+        </div>
+
+        <div class="recipe">
+            <h2>Berry Smoothie Bowl</h2>
+            <p>A thick smoothie made with mixed berries and bananas, topped with granola, coconut flakes, and chia seeds.</p>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="window.location.href='index.html'">Feed</div>
+        <div class="nav-item" id="plus-nav">
+            <i class="plus-icon">+</i>
+        </div>
+        <div class="nav-item" onclick="window.location.href='index.html'">Clubs</div>
+        <div class="nav-item" onclick="window.location.href='recipe.html'">Recipes</div>
+    </div>
+
+    <script>
+        const plusNav = document.getElementById('plus-nav');
+        plusNav.addEventListener('click', () => {
+            window.location.href = 'index.html'; // or link back to camera/modal functionality if you want
+        });
+    </script>
+</body>
+</html>

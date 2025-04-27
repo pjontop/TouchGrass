@@ -1,1 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Testing</title>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Work Sans', sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .camera-container {
+            background: #ffefc9;
+            border-radius: 40px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .camera-container h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-family: 'Space Mono', monospace;
+        }
+        .camera-container p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        video, canvas {
+            width: 90%;
+            max-width: 450px;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background-color: #e4a0b7;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #d55f87;
+        }
+        #recordingIndicator {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #e4a0b7;
+            font-weight: bold;
+        }
+        a:hover {
+            color: #d55f87;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="camera-container">
+        <h1>Camera Testing</h1>
+        <p>Test your camera by capturing photos or recording videos.</p>
+
+        <video id="video" autoplay playsinline muted></video>
+        <br>
+
+        <button id="capturePhoto">Capture Photo</button>
+        <button id="startRecording">Start Recording</button>
+        <button id="stopRecording" disabled>Stop Recording</button>
+
+        <div id="recordingIndicator">● Recording...</div>
+
+        <br>
+        <canvas id="canvas" style="display: none;"></canvas>
+        <div id="recordedVideoContainer" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturePhotoButton = document.getElementById('capturePhoto');
+        const startRecordingButton = document.getElementById('startRecording');
+        const stopRecordingButton = document.getElementById('stopRecording');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const recordedVideoContainer = document.getElementById('recordedVideoContainer');
+        const recipeNav = document.getElementById('recipe-nav');
+
+recipeNav.addEventListener('click', () => {
+    window.location.href = 'recipe.html';
+});
+
+        const context = canvas.getContext('2d');
+
+        let mediaRecorder;
+        let recordedChunks = [];
+        let recordingTimeout;
+
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }, 
+                    audio: true
+                });
+                video.srcObject = stream;
+                window.localStream = stream;
+            } catch (err) {
+                console.error('Error accessing camera: ', err);
+                alert("Could not access camera.");
+            }
+        }
+
+        initCamera();
+
+        // Capture Photo
+        capturePhotoButton.addEventListener('click', () => {
+            canvas.style.display = 'block';
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Capture image as base64 string
+            const imageURL = canvas.toDataURL('image/png');
+
+            // Send the image to the backend
+            fetch('http://localhost:5200/upload-photo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: imageURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Photo uploaded successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error uploading photo:', error);
+            });
+        });
+
+        // Start Video Recording
+        startRecordingButton.addEventListener('click', () => {
+            recordedChunks = [];
+            const options = { mimeType: 'video/webm; codecs=vp9' };
+
+            mediaRecorder = new MediaRecorder(window.localStream, options);
+
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoURL = URL.createObjectURL(blob);
+
+                // Create a FormData object and append the video
+                const formData = new FormData();
+                formData.append('video', blob, 'recording.webm');
+
+                // Send the video to the backend
+                fetch('http://localhost:5200/upload-video', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Video uploaded successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error uploading video:', error);
+                });
+
+                // Display the recorded video
+                const recordedVideo = document.createElement('video');
+                recordedVideo.controls = true;
+                recordedVideo.src = videoURL;
+                recordedVideo.style.width = '90%';
+                recordedVideo.style.maxWidth = '500px';
+                recordedVideoContainer.innerHTML = '';
+                recordedVideoContainer.appendChild(recordedVideo);
+
+                const downloadLink = document.createElement('a');
+                downloadLink.href = videoURL;
+                downloadLink.download = 'recording.webm';
+                downloadLink.textContent = 'Download Video';
+                recordedVideoContainer.appendChild(downloadLink);
+
+                recordingIndicator.style.display = 'none';
+            };
+
+            mediaRecorder.start();
+            startRecordingButton.disabled = true;
+            stopRecordingButton.disabled = false;
+            recordingIndicator.style.display = 'block';
+
+            // Automatically stop recording after 15 seconds (15000 ms)
+            recordingTimeout = setTimeout(() => {
+                if (mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                    startRecordingButton.disabled = false;
+                    stopRecordingButton.disabled = true;
+                    recordingIndicator.style.display = 'none';
+                }
+            }, 15000);
+        });
+
+        // Stop Video Recording manually
+        stopRecordingButton.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+            clearTimeout(recordingTimeout);
+            startRecordingButton.disabled = false;
+            stopRecordingButton.disabled = true;
+            recordingIndicator.style.display = 'none';
+        });
+    </script>
+
+</body>
+</html>
